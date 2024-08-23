@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function TaskMateLogin() {
   const [email, setEmail] = useState('');
@@ -18,6 +19,13 @@ export default function TaskMateLogin() {
     }
     setEmailError('');
     // Proceed with the login logic
+  };
+
+  const router = useRouter();
+
+  const handleLogin = () => {
+    // Perform login validation here if needed
+    router.push('/HomeScreen'); // Navigate to HomeScreen
   };
 
   return (
