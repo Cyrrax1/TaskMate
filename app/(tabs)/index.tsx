@@ -7,7 +7,7 @@ export default function TaskMateLogin() {
 
   const handleLogin = () => {
     // Perform login validation here if needed
-    router.push('/HomeScreen'); // Navigate to HomeScreen
+    router.push('/home-screen'); // Navigate to HomeScreen
   };
 
   return (
