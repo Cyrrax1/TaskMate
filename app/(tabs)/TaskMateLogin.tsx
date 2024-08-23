@@ -1,7 +1,15 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function TaskMateLogin() {
+  const router = useRouter();
+
+  const handleLogin = () => {
+    // Perform login validation here if needed
+    router.push('/HomeScreen'); // Navigate to HomeScreen
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome to</Text>
@@ -20,7 +28,7 @@ export default function TaskMateLogin() {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>LOG IN</Text>
       </TouchableOpacity>
 
