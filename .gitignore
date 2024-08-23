@@ -1,0 +1,83 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Logs
+logs/
+*.log
+*.log.*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.python-version
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.classpath
+*.project
+*.settings/
+target/
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+*.stackdump
+
+# Coverage reports
+coverage/
+*.lcov
+*.lcov.*
+
+# Dependency directories
+vendor/
+bundle/
+
+# Build directories
+dist/
+out/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
