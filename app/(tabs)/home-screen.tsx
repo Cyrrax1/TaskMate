@@ -35,7 +35,7 @@ export default function HomeScreen() {
         data={tasks}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <View style={styles.taskContainer}>
+          <View style={[styles.taskContainer, item.done && styles.taskContainerDone]}>
             <Text style={[styles.taskText, item.done && styles.taskTextDone]}>
               {item.title}
             </Text>
@@ -96,6 +96,9 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 15,
     marginBottom: 30,
+  },
+  taskContainerDone: {
+    opacity: 0.5, // Reduce opacity when task is marked as done
   },
   taskText: {
     fontSize: 18,
