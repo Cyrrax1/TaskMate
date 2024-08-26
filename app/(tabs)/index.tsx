@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function TaskMateLogin() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleLogin = () => {
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email');
+      return;
+    }
+    setEmailError('');
+    router.push('/home-screen'); // Navigate to HomeScreen
+  };
+
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome to</Text>
@@ -9,18 +30,24 @@ export default function TaskMateLogin() {
       <Text style={styles.loginText}>Log in</Text>
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, emailError ? styles.inputError : null]}
         placeholder="Email"
         placeholderTextColor="#000"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
       />
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+
       <TextInput
         style={styles.input}
         placeholder="Password"
         placeholderTextColor="#000"
         secureTextEntry
+        value={password}
+        onChangeText={(text) => setPassword(text)}
       />
 
-      <TouchableOpacity style={styles.loginButton}>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.buttonText}>LOG IN</Text>
       </TouchableOpacity>
 
@@ -61,6 +88,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#F5F5F5',
     marginBottom: 15,
+  },
+  inputError: {
+    borderColor: '#FF0000',
+  },
+  errorText: {
+    color: '#FF0000',
+    marginBottom: 15,
+    fontSize: 14,
   },
   loginButton: {
     width: '80%',
