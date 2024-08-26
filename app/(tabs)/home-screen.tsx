@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 const tasks = [
   { id: '1', title: 'To-do Task 1' },
@@ -11,8 +12,19 @@ const tasks = [
 ];
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
+      {/* Hamburger Menu */}
+      <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
+        <FontAwesome name="bars" size={24} color="black" />
+      </TouchableOpacity>
+
+      {/* Title */}
+      <Text style={styles.title}>Home</Text>
+
+      {/* Task List */}
       <FlatList
         data={tasks}
         keyExtractor={item => item.id}
@@ -21,13 +33,24 @@ export default function HomeScreen() {
             <Text style={styles.taskText}>{item.title}</Text>
             <View style={styles.taskIcons}>
               <FontAwesome name="star-o" size={24} color="black" />
-              <FontAwesome name="pencil" size={24} color="black" />
+              {/* Edit Task */}
+              <FontAwesome
+                name="pencil"
+                size={24}
+                color="black"
+                onPress={() => router.push({
+                  pathname: '/edit-screen',
+                  params: { task: JSON.stringify(item) }
+                })}
+              />
               <FontAwesome name="square-o" size={24} color="black" />
             </View>
           </View>
         )}
       />
-      <TouchableOpacity style={styles.addButton} onPress={() => console.log('Add new task')}>
+
+      {/* Add Button */}
+      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-screen')}>
         <FontAwesome name="plus" size={24} color="black" />
       </TouchableOpacity>
     </View>
@@ -40,6 +63,19 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#E6E4DE',
   },
+  hamburgerMenu: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
   taskContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -47,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 25,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 30,
   },
   taskText: {
     fontSize: 18,
@@ -61,7 +97,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     bottom: 30,
-    right: 30,
+    alignSelf: 'center',
     width: 50,
     height: 50,
     backgroundColor: '#FFFFFF',

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddScreen() {
   const [taskTitle, setTaskTitle] = useState('');
-  const [taskDate, setTaskDate] = useState('');
+  const [taskDate, setTaskDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
 
   const handleSave = () => {
@@ -15,75 +17,94 @@ export default function AddScreen() {
     router.push('/home-screen'); // Navigate back to HomeScreen after saving
   };
 
+  const onChangeDate = (event: any, selectedDate: Date | undefined) => {
+    const currentDate = selectedDate || taskDate;
+    setShowDatePicker(Platform.OS === 'ios'); // On iOS, keep the picker open
+    setTaskDate(currentDate);
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Hamburger Menu */}
-      <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
-        <FontAwesome name="bars" size={24} color="black" />
-      </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        {/* Hamburger Menu */}
+        <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
+          <FontAwesome name="bars" size={24} color="black" />
+        </TouchableOpacity>
 
-      {/* Title */}
-      <Text style={styles.title}>Add</Text>
+        {/* Title */}
+        <Text style={styles.title}>Add</Text>
 
-      {/* Task Title Input */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Titel</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter task title"
-          value={taskTitle}
-          onChangeText={setTaskTitle}
-        />
-      </View>
-
-      {/* Calendar Input */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Calendar</Text>
-        <View style={styles.calendarInput}>
+        {/* Task Title Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Titel</Text>
           <TextInput
-            style={[styles.input, { flex: 1 }]}
-            placeholder="Select date"
-            value={taskDate}
-            onChangeText={setTaskDate}
+            style={styles.input}
+            placeholder="Enter task title"
+            value={taskTitle}
+            onChangeText={setTaskTitle}
           />
-          <FontAwesome name="calendar" size={24} color="black" />
+        </View>
+
+        {/* Calendar Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Calendar</Text>
+          <TouchableOpacity
+            style={styles.calendarInput}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={{ flex: 1 }}>
+              {taskDate.toDateString()} {/* Display the selected date */}
+            </Text>
+            <FontAwesome name="calendar" size={24} color="black" />
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={taskDate}
+              mode="date"
+              display="default"
+              onChange={onChangeDate}
+            />
+          )}
+        </View>
+
+        {/* Task Description Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Enter task description"
+            value={taskDescription}
+            onChangeText={setTaskDescription}
+            multiline
+          />
+        </View>
+
+        {/* Prioritize Toggle */}
+        <View style={styles.priorityContainer}>
+          <Text style={styles.label}>Priorisieren?</Text>
+          <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
+            <FontAwesome name={isPrioritized ? "star" : "star-o"} size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
         </View>
       </View>
-
-      {/* Task Description Input */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Enter task description"
-          value={taskDescription}
-          onChangeText={setTaskDescription}
-          multiline
-        />
-      </View>
-
-      {/* Prioritize Toggle */}
-      <View style={styles.priorityContainer}>
-        <Text style={styles.label}>Priorisieren?</Text>
-        <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
-          <FontAwesome name={isPrioritized ? "star" : "star-o"} size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -128,11 +149,13 @@ const styles = StyleSheet.create({
   calendarInput: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 25,
     paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
+    height: 50,
   },
   priorityContainer: {
     flexDirection: 'row',
