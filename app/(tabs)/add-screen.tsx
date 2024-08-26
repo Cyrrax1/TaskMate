@@ -3,17 +3,20 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollVi
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTaskContext } from '../TaskContext'; // Import TaskContext
 
-export default function EditScreen() {
+export default function AddScreen() {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDate, setTaskDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
+  const { addTask } = useTaskContext(); // Use TaskContext
 
   const handleSave = () => {
-    // Save task logic here
+    // Add the new task using the addTask function from the context
+    addTask(taskTitle, isPrioritized);
     router.push('/home-screen'); // Navigate back to HomeScreen after saving
   };
 
@@ -32,11 +35,11 @@ export default function EditScreen() {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text style={styles.title}>Edit</Text>
+        <Text style={styles.title}>Add</Text>
 
         {/* Task Title Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Titel</Text>
+          <Text style={styles.label}>Title</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter task title"
@@ -81,7 +84,7 @@ export default function EditScreen() {
 
         {/* Prioritize Toggle */}
         <View style={styles.priorityContainer}>
-          <Text style={styles.label}>Priorisieren?</Text>
+          <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
             <FontAwesome name={isPrioritized ? "star" : "star-o"} size={24} color="black" />
           </TouchableOpacity>

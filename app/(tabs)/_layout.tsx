@@ -1,7 +1,8 @@
-import { Tabs, useRouter } from "expo-router";
+import { Tabs } from "expo-router";
 import { TaskProvider } from "../TaskContext";
 import { FontAwesome } from '@expo/vector-icons';
 import { TouchableOpacity, Text } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function RootLayout() {
     <TaskProvider>
       <Tabs
         screenOptions={({ route }) => ({
+          headerShown: false,
           tabBarIcon: ({ color, size }) => {
             let iconName;
 
@@ -34,7 +36,6 @@ export default function RootLayout() {
         <Tabs.Screen name="home-screen" options={{ tabBarLabel: 'Home' }} />
         <Tabs.Screen name="archived-screen" options={{ tabBarLabel: 'Archived' }} />
         <Tabs.Screen name="calendar" options={{ tabBarLabel: 'Calendar' }} />
-
         {/* Custom Logout Button */}
         <Tabs.Screen
           name="logout"

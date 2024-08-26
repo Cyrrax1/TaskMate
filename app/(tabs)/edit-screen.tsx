@@ -3,20 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollVi
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTaskContext } from './TaskContext'; // Import TaskContext
 
-export default function AddScreen() {
+export default function EditScreen() {
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDate, setTaskDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const router = useRouter();
-  const { addTask } = useTaskContext(); // Use TaskContext
 
   const handleSave = () => {
-    // Add the new task using the addTask function from the context
-    addTask(taskTitle, isPrioritized);
+    // Save task logic here
     router.push('/home-screen'); // Navigate back to HomeScreen after saving
   };
 
@@ -35,7 +32,7 @@ export default function AddScreen() {
         </TouchableOpacity>
 
         {/* Title */}
-        <Text style={styles.title}>Add</Text>
+        <Text style={styles.title}>Edit</Text>
 
         {/* Task Title Input */}
         <View style={styles.inputContainer}>
