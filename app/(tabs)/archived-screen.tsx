@@ -1,10 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
 
 export default function ArchivedScreen() {
-  const { archivedTasks } = useTaskContext();
+  const { archivedTasks, unarchiveTask } = useTaskContext();
+
+  const handleUnarchive = (taskId: string) => {
+    unarchiveTask(taskId); // Unarchive the task and move it back to the active tasks list
+  };
 
   return (
     <View style={styles.container}>
@@ -31,12 +35,14 @@ export default function ArchivedScreen() {
                 style={styles.iconSpacing}
                 onPress={() => console.log(`Edit ${item.title}`)}
               />
-              <FontAwesome
-                name="check-square"
-                size={24}
-                color="green"
-                style={styles.iconSpacing}
-              />
+              <TouchableOpacity onPress={() => handleUnarchive(item.id)}>
+                <FontAwesome
+                  name="check-square"
+                  size={24}
+                  color="green"
+                  style={styles.iconSpacing}
+                />
+              </TouchableOpacity>
             </View>
           </View>
         )}

@@ -5,10 +5,18 @@ import HomeScreen from './(tabs)/home-screen';
 import ArchivedScreen from './(tabs)/archived-screen';
 import { FontAwesome } from '@expo/vector-icons';
 import { TaskProvider } from './TaskContext';
+import { useRouter } from 'expo-router';
 
 const Tab = createBottomTabNavigator();
 
 function AppNavigator() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Navigate back to the login screen
+    router.replace('/');
+  };
+
   return (
     <TaskProvider>
       <NavigationContainer>
@@ -22,6 +30,10 @@ function AppNavigator() {
                 iconName = 'home';
               } else if (route.name === 'Archived') {
                 iconName = 'archive';
+              } else if (route.name === 'Calendar') {
+                iconName = 'calendar';
+              } else if (route.name === 'Logout') {
+                iconName = 'sign-out';
               }
 
               return <FontAwesome name={iconName} size={size} color={color} />;
@@ -32,6 +44,27 @@ function AppNavigator() {
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Archived" component={ArchivedScreen} />
+          <Tab.Screen
+            name="Calendar"
+            component={() => null} // Placeholder for the calendar screen
+            listeners={{
+              tabPress: (e) => {
+                e.preventDefault();
+                // Logic to open or display the calendar
+                console.log('Calendar button pressed');
+              },
+            }}
+          />
+          <Tab.Screen
+            name="Logout"
+            component={() => null} // Placeholder for the logout
+            listeners={{
+              tabPress: (e) => {
+                e.preventDefault();
+                handleLogout();
+              },
+            }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </TaskProvider>

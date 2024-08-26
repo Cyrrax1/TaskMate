@@ -12,6 +12,7 @@ interface TaskContextProps {
   archivedTasks: Task[];
   toggleTaskDone: (taskId: string) => void;
   archiveTask: (taskId: string) => void;
+  unarchiveTask: (taskId: string) => void;
   addTask: (title: string, prioritized?: boolean) => void;
 }
 
@@ -52,6 +53,14 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const unarchiveTask = (taskId: string) => {
+    const taskToUnarchive = archivedTasks.find(task => task.id === taskId);
+    if (taskToUnarchive) {
+      setTasks(prevTasks => [...prevTasks, { ...taskToUnarchive, done: false }]);
+      setArchivedTasks(prevArchived => prevArchived.filter(task => task.id !== taskId));
+    }
+  };
+
   const addTask = (title: string, prioritized = false) => {
     setTasks(prevTasks => [
       ...prevTasks,
@@ -65,7 +74,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, archivedTasks, toggleTaskDone, archiveTask, addTask }}>
+    <TaskContext.Provider value={{ tasks, archivedTasks, toggleTaskDone, archiveTask, unarchiveTask, addTask }}>
       {children}
     </TaskContext.Provider>
   );

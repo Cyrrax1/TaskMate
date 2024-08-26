@@ -13,42 +13,50 @@ export default function HomeScreen() {
     setTimeout(() => archiveTask(taskId), 500);
   };
 
+  const renderItem = ({ item }: { item: typeof tasks[0] }) => (
+    <View style={styles.taskContainer}>
+      <Text style={[styles.taskText, item.done && styles.taskTextDone]}>
+        {item.title}
+      </Text>
+      <View style={styles.taskIcons}>
+        <FontAwesome
+          name="star-o"
+          size={24}
+          color="black"
+          style={styles.iconSpacing}
+        />
+        <FontAwesome
+          name="pencil"
+          size={24}
+          color="black"
+          style={styles.iconSpacing}
+          onPress={() => router.push({ pathname: '/edit-screen', params: { task: JSON.stringify(item) } })}
+        />
+        <TouchableOpacity onPress={() => handleToggleDone(item.id)}>
+          <FontAwesome
+            name={item.done ? "check-square" : "square-o"}
+            size={24}
+            color={item.done ? "green" : "black"}
+            style={styles.iconSpacing}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
       <FlatList
         data={tasks}
-        keyExtractor={item => item.id} // Ensure unique ID is used
-        renderItem={({ item }) => (
-          <View style={styles.taskContainer}>
-            <Text style={[styles.taskText, item.done && styles.taskTextDone]}>
-              {item.title}
-            </Text>
-            <View style={styles.taskIcons}>
-              <FontAwesome
-                name="star-o"
-                size={24}
-                color="black"
-                style={styles.iconSpacing}
-              />
-              <FontAwesome
-                name="pencil"
-                size={24}
-                color="black"
-                style={styles.iconSpacing}
-                onPress={() => router.push({ pathname: '/edit-screen', params: { task: JSON.stringify(item) } })}
-              />
-              <TouchableOpacity onPress={() => handleToggleDone(item.id)}>
-                <FontAwesome
-                  name={item.done ? "check-square" : "square-o"}
-                  size={24}
-                  color={item.done ? "green" : "black"}
-                  style={styles.iconSpacing}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+        removeClippedSubviews={true}
+        initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        scrollEnabled={true}
+        contentContainerStyle={styles.flatListContent}
       />
       <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-screen')}>
         <FontAwesome name="plus" size={24} color="black" />
@@ -69,6 +77,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 20,
+  },
+  flatListContent: {
+    paddingBottom: 80, // Add padding to ensure the last item isn't obstructed by the add button
   },
   taskContainer: {
     flexDirection: 'row',
