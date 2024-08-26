@@ -1,13 +1,13 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
+import { TaskProvider } from "../TaskContext";
 
 export default function RootLayout() {
   return (
-    <Stack>
-      {/* The main entry point for your app - the login screen */}
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-
-      {/* The home screen that the user will navigate to after logging in */}
-      <Stack.Screen name="home-screen" options={{ headerShown: false }} />
-    </Stack>
+    <TaskProvider>
+      <Tabs>
+        <Tabs.Screen name="home-screen" options={{ tabBarLabel: 'Home' }} />
+        <Tabs.Screen name="archived-screen" options={{ tabBarLabel: 'Archived' }} />
+      </Tabs>
+    </TaskProvider>
   );
 }
