@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -7,7 +7,7 @@ export default function TaskMateLogin() {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
 
-  const validateEmail = (email) => {
+  const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
@@ -18,15 +18,10 @@ export default function TaskMateLogin() {
       return;
     }
     setEmailError('');
-    // Proceed with the login logic
+    router.push('/home-screen'); // Navigate to HomeScreen
   };
 
   const router = useRouter();
-
-  const handleLogin = () => {
-    // Perform login validation here if needed
-    router.push('/home-screen'); // Navigate to HomeScreen
-  };
 
   return (
     <View style={styles.container}>
