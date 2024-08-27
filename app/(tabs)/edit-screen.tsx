@@ -36,7 +36,7 @@ export default function EditScreen() {
 
         {/* Task Title Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Titel</Text>
+          <Text style={styles.label}>Title</Text>
           <TextInput
             style={styles.input}
             placeholder="Enter task title"
@@ -81,7 +81,7 @@ export default function EditScreen() {
 
         {/* Prioritize Toggle */}
         <View style={styles.priorityContainer}>
-          <Text style={styles.label}>Priorisieren?</Text>
+          <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
             <FontAwesome name={isPrioritized ? "star" : "star-o"} size={24} color="black" />
           </TouchableOpacity>
