@@ -1,67 +1,63 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
 import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const [tasks, setTasks] = useState([
-    { id: '1', title: 'To-do Task 1', done: false },
-    { id: '2', title: 'To-do Task 2', done: false },
-    { id: '3', title: 'To-do Task 3', done: false },
-    { id: '4', title: 'To-do Task 4', done: false },
-    { id: '5', title: 'To-do Task 5', done: false },
-  ]);
-
+  const { tasks, toggleTaskDone, archiveTask } = useTaskContext();
   const router = useRouter();
 
-  const toggleTaskDone = (taskId: string) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, done: !task.done } : task
-    ));
+  const handleToggleDone = (taskId: string) => {
+    toggleTaskDone(taskId);
+    setTimeout(() => archiveTask(taskId), 500);
   };
+
+  const renderItem = ({ item }: { item: typeof tasks[0] }) => (
+    <View style={styles.taskContainer}>
+      <Text style={[styles.taskText, item.done && styles.taskTextDone]}>
+        {item.title}
+      </Text>
+      <View style={styles.taskIcons}>
+        <FontAwesome
+          name="star-o"
+          size={24}
+          color="black"
+          style={styles.iconSpacing}
+        />
+        <FontAwesome
+          name="pencil"
+          size={24}
+          color="black"
+          style={styles.iconSpacing}
+          onPress={() => router.push({ pathname: '/edit-screen', params: { task: JSON.stringify(item) } })}
+        />
+        <TouchableOpacity onPress={() => handleToggleDone(item.id)}>
+          <FontAwesome
+            name={item.done ? "check-square" : "square-o"}
+            size={24}
+            color={item.done ? "green" : "black"}
+            style={styles.iconSpacing}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* Hamburger Menu */}
-      <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
-        <FontAwesome name="bars" size={24} color="black" />
-      </TouchableOpacity>
-
-      {/* Title */}
       <Text style={styles.title}>Home</Text>
-
-      {/* Task List */}
       <FlatList
         data={tasks}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.taskContainer}>
-            <Text style={[styles.taskText, item.done && styles.taskTextDone]}>
-              {item.title}
-            </Text>
-            <View style={styles.taskIcons}>
-              <FontAwesome name="star-o" size={24} color="black" style={styles.iconSpacing} />
-              <FontAwesome
-                name="pencil"
-                size={24}
-                color="black"
-                style={styles.iconSpacing}
-                onPress={() => router.push({ pathname: '/edit-screen', params: { task: JSON.stringify(item) } })}
-              />
-              <TouchableOpacity onPress={() => toggleTaskDone(item.id)}>
-                <FontAwesome
-                  name={item.done ? "check-square" : "square-o"} // Toggle between checked and unchecked
-                  size={24}
-                  color={item.done ? "green" : "black"} // Change color if done
-                  style={styles.iconSpacing}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+        renderItem={renderItem}
+        removeClippedSubviews={true}
+        initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        scrollEnabled={true}
+        contentContainerStyle={styles.flatListContent}
       />
-
-      {/* Add Button */}
       <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-screen')}>
         <FontAwesome name="plus" size={24} color="black" />
       </TouchableOpacity>
@@ -75,18 +71,15 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#E6E4DE',
   },
-  hamburgerMenu: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 20,
+  },
+  flatListContent: {
+    paddingBottom: 80, // Add padding to ensure the last item isn't obstructed by the add button
   },
   taskContainer: {
     flexDirection: 'row',
@@ -100,19 +93,19 @@ const styles = StyleSheet.create({
   taskText: {
     fontSize: 18,
     fontWeight: 'bold',
-    flex: 1, // Take up remaining space
+    flex: 1,
   },
   taskTextDone: {
-    textDecorationLine: 'line-through', // Strike-through effect when done
+    textDecorationLine: 'line-through',
     color: '#888',
   },
   taskIcons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end', // Align icons to the right
+    justifyContent: 'flex-end',
     alignItems: 'center',
   },
   iconSpacing: {
-    marginLeft: 15, // Add space between icons
+    marginLeft: 15,
   },
   addButton: {
     position: 'absolute',
