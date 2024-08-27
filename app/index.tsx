@@ -9,11 +9,13 @@ export default function TaskMateLogin() {
   const [emailError, setEmailError] = useState('');
   const router = useRouter();
 
-  const db = SQLite.openDatabaseSync('taskmate')
+  const db = SQLite.openDatabaseSync('taskmate');
 
   useEffect(() => {
-      db.execSync(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);`);
-       db.execSync(`INSERT INTO users(email, password) VALUES('test@g.ch', 'test');`);
+    db.execSync(
+      `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);`
+    );
+    db.execSync(`INSERT INTO users(email, password) VALUES('test@g.ch', 'test');`);
   }, []);
 
   const validateEmail = (email) => {
@@ -29,9 +31,12 @@ export default function TaskMateLogin() {
     setEmailError('');
 
     if (db) {
-      const result = await db.getFirstAsync('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
+      const result = await db.getFirstAsync(
+        'SELECT * FROM users WHERE email = ? AND password = ?',
+        [email, password]
+      );
       if (result) {
-        router.push('/home-screen');
+        router.replace('/home-screen'); // Navigate to the home screen after login
       } else {
         setEmailError('Invalid credentials');
       }
