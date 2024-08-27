@@ -6,6 +6,7 @@ import ArchivedScreen from './(tabs)/archived-screen';
 import { FontAwesome } from '@expo/vector-icons';
 import { TaskProvider } from './TaskContext';
 import { useRouter } from 'expo-router';
+import CalendarScreen from './(tabs)/calendar-screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -44,17 +45,8 @@ function AppNavigator() {
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Archived" component={ArchivedScreen} />
-          <Tab.Screen
-            name="Calendar"
-            component={() => null} // Placeholder for the calendar screen
-            listeners={{
-              tabPress: (e) => {
-                e.preventDefault();
-                // Logic to open or display the calendar
-                console.log('Calendar button pressed');
-              },
-            }}
-          />
+          <Tab.Screen name="calendar" component={CalendarScreen} options={{ tabBarLabel: 'Calendar' }} />
+
           <Tab.Screen
             name="Logout"
             component={() => null} // Placeholder for the logout

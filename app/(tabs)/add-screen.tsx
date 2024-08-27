@@ -15,9 +15,8 @@ export default function AddScreen() {
   const { addTask } = useTaskContext(); // Use TaskContext
 
   const handleSave = () => {
-    // Add the new task using the addTask function from the context
-    addTask(taskTitle, isPrioritized);
-    router.push('/home-screen'); // Navigate back to HomeScreen after saving
+    addTask(taskTitle, taskDate.toISOString().split('T')[0], isPrioritized);
+    router.push('/home-screen'); // Zurück zur Startseite nach dem Speichern
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
@@ -29,11 +28,6 @@ export default function AddScreen() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Hamburger Menu */}
-        <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
-          <FontAwesome name="bars" size={24} color="black" />
-        </TouchableOpacity>
-
         {/* Title */}
         <Text style={styles.title}>Add</Text>
 
@@ -113,17 +107,12 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#E6E4DE',
   },
-  hamburgerMenu: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 20,
+    marginTop: 40,   // Adjust this margin to align it with your HomeScreen title
+    marginBottom: 20,
   },
   inputContainer: {
     marginBottom: 20,
