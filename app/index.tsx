@@ -1,27 +1,47 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import * as SQLite from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 
 export default function TaskMateLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
+  const router = useRouter();
 
-  const validateEmail = (email: string) => {
+  const db = SQLite.openDatabaseSync('taskmate');
+
+  useEffect(() => {
+    db.execSync(
+      `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY NOT NULL, email TEXT NOT NULL, password TEXT NOT NULL);`
+    );
+    db.execSync(`INSERT INTO users(email, password) VALUES('test@g.ch', 'test');`);
+  }, []);
+
+  const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email');
       return;
     }
     setEmailError('');
-    router.push('/home-screen'); // Navigate to HomeScreen
-  };
 
-  const router = useRouter();
+    if (db) {
+      const result = await db.getFirstAsync(
+        'SELECT * FROM users WHERE email = ? AND password = ?',
+        [email, password]
+      );
+      if (result) {
+        router.replace('/home-screen'); // Navigate to the home screen after login
+      } else {
+        setEmailError('Invalid credentials');
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
