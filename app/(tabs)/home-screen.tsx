@@ -1,5 +1,3 @@
-// In HomeScreen.tsx
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
@@ -17,6 +15,10 @@ export default function HomeScreen() {
 
   const handleDeleteTask = (taskId: string) => {
     deleteTask(taskId);
+  };
+
+  const handleLogout = () => {
+    router.replace('/'); // Navigates to the login page
   };
 
   const renderItem = ({ item }: { item: typeof tasks[0] }) => (
@@ -60,8 +62,13 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Styled Logout button at the top left */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <FontAwesome name="sign-out" size={24} color="black" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Home</Text>
-      
+
       {tasks.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Welcome to TaskMate!</Text>
@@ -93,6 +100,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#E6E4DE',
+  },
+  logoutButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15, // Rounded edges
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, // Soft shadow
+    shadowRadius: 4,
+    elevation: 3, // For Android shadow effect
   },
   title: {
     fontSize: 24,
