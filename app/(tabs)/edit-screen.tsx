@@ -1,38 +1,50 @@
-import React, { useState } from 'react';
+// EditScreen.tsx
+
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTaskContext } from '../TaskContext';
 
-export default function EditScreen({ route }) {
-  const { task } = route.params; // Nehmen Sie an, dass die Task-Daten von HomeScreen übergeben wurden
-  const [taskTitle, setTaskTitle] = useState(task.title);
-  const [taskDate, setTaskDate] = useState(new Date(task.date));
-  const [taskDescription, setTaskDescription] = useState(task.description || '');
-  const [isPrioritized, setIsPrioritized] = useState(task.prioritized);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+export default function EditScreen() {
   const router = useRouter();
   const { updateTask } = useTaskContext();
+  const { task } = useLocalSearchParams();
+
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDate, setTaskDate] = useState(new Date());
+  const [taskDescription, setTaskDescription] = useState('');
+  const [isPrioritized, setIsPrioritized] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    if (task) {
+      const parsedTask = JSON.parse(task); // Parse the task JSON string
+      setTaskTitle(parsedTask.title);
+      setTaskDate(new Date(parsedTask.date));
+      setTaskDescription(parsedTask.description || '');
+      setIsPrioritized(parsedTask.prioritized || false);
+    }
+  }, [task]);
 
   const handleSave = () => {
-    updateTask(task.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized);
-    router.push('/home-screen'); // Zurück zur Startseite nach dem Speichern
+    const parsedTask = JSON.parse(task); // Parse the task to get the correct id
+    updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription);
+    router.push('/home-screen'); // Navigate back to the home screen after saving
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || taskDate;
-    setShowDatePicker(Platform.OS === 'ios'); // Auf iOS bleibt der Picker geöffnet
+    setShowDatePicker(Platform.OS === 'ios');
     setTaskDate(currentDate);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Titel */}
         <Text style={styles.title}>Edit</Text>
 
-        {/* Task-Titel-Eingabe */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Title</Text>
           <TextInput
@@ -43,7 +55,6 @@ export default function EditScreen({ route }) {
           />
         </View>
 
-        {/* Kalender-Eingabe */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Calendar</Text>
           <TouchableOpacity
@@ -51,7 +62,7 @@ export default function EditScreen({ route }) {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={{ flex: 1 }}>
-              {taskDate.toDateString()} {/* Zeigt das ausgewählte Datum an */}
+              {taskDate.toDateString()}
             </Text>
             <FontAwesome name="calendar" size={24} color="black" />
           </TouchableOpacity>
@@ -65,7 +76,6 @@ export default function EditScreen({ route }) {
           )}
         </View>
 
-        {/* Task-Beschreibung-Eingabe */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -77,7 +87,6 @@ export default function EditScreen({ route }) {
           />
         </View>
 
-        {/* Priorisieren umschalten */}
         <View style={styles.priorityContainer}>
           <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
@@ -85,7 +94,6 @@ export default function EditScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Aktions-Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 40, // Passt die Position an den Titel der Startseite an
+    marginTop: 40,
     marginBottom: 20,
   },
   inputContainer: {
@@ -124,7 +132,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8, // Added margin to space label from the input
   },
   input: {
     width: '100%',
@@ -136,8 +144,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 100,
+    height: 120, // Increased height for better appearance
     textAlignVertical: 'top',
+    paddingTop: 12, // Added padding to avoid text touching the top edge
+    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
   },
   calendarInput: {
     flexDirection: 'row',
