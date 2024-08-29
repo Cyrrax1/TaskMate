@@ -5,7 +5,7 @@ import { useTaskContext } from '../TaskContext';
 import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const { tasks, toggleTaskDone, archiveTask, deleteTask } = useTaskContext();
+  const { tasks, toggleTaskDone, archiveTask, deleteTask, updateTask } = useTaskContext();
   const router = useRouter();
 
   const handleToggleDone = (taskId: string) => {
@@ -17,8 +17,12 @@ export default function HomeScreen() {
     deleteTask(taskId);
   };
 
-  const handleLogout = () => {
-    router.replace('/'); // Navigates to the login page
+  const handleTogglePriority = (taskId: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      // Toggle the priority of the task
+      updateTask(taskId, task.title, task.date, !task.prioritized, task.description);
+    }
   };
 
   const renderItem = ({ item }: { item: typeof tasks[0] }) => (
@@ -28,19 +32,16 @@ export default function HomeScreen() {
       </Text>
       <View style={styles.taskIcons}>
         <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
+          <FontAwesome name="trash" size={24} color="red" style={styles.iconSpacing} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleTogglePriority(item.id)}>
           <FontAwesome
-            name="trash"
+            name={item.prioritized ? "star" : "star-o"}
             size={24}
-            color="red"
+            color={item.prioritized ? "gold" : "black"}
             style={styles.iconSpacing}
           />
         </TouchableOpacity>
-        <FontAwesome
-          name="star-o"
-          size={24}
-          color="black"
-          style={styles.iconSpacing}
-        />
         <FontAwesome
           name="pencil"
           size={24}
@@ -62,8 +63,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Styled Logout button at the top left */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => router.replace('/')}>
         <FontAwesome name="sign-out" size={24} color="black" />
       </TouchableOpacity>
 
@@ -107,12 +107,12 @@ const styles = StyleSheet.create({
     left: 20,
     padding: 10,
     backgroundColor: '#FFFFFF',
-    borderRadius: 15, // Rounded edges
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2, // Soft shadow
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 3, // For Android shadow effect
+    elevation: 3,
   },
   title: {
     fontSize: 24,

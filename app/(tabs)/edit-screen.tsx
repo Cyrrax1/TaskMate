@@ -11,31 +11,39 @@ export default function EditScreen() {
   const { task } = useLocalSearchParams();
 
   const [taskTitle, setTaskTitle] = useState('');
-  const [taskDate, setTaskDate] = useState(new Date());
+  const [taskDate, setTaskDate] = useState<Date | null>(null);
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     if (task) {
-      const parsedTask = JSON.parse(task); // Parse the task JSON string
-      setTaskTitle(parsedTask.title);
-      setTaskDate(new Date(parsedTask.date));
-      setTaskDescription(parsedTask.description || '');
-      setIsPrioritized(parsedTask.prioritized || false);
+      try {
+        const parsedTask = JSON.parse(task); // Parse the task JSON string
+        setTaskTitle(parsedTask.title || ''); // Set title
+        setTaskDate(parsedTask.date ? new Date(parsedTask.date) : new Date()); // Set date
+        setTaskDescription(parsedTask.description || ''); // Set description
+        setIsPrioritized(parsedTask.prioritized || false); // Set priority
+      } catch (error) {
+        console.error('Error parsing task:', error);
+      }
     }
   }, [task]);
 
   const handleSave = () => {
-    const parsedTask = JSON.parse(task); // Parse the task to get the correct id
-    updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription);
-    router.push('/home-screen'); // Navigate back to the home screen after saving
+    if (taskDate) {
+      const parsedTask = JSON.parse(task); // Parse the task to get the correct id
+      updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription);
+      router.push('/home-screen'); // Navigate back to the home screen after saving
+    }
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || taskDate;
     setShowDatePicker(Platform.OS === 'ios');
-    setTaskDate(currentDate);
+    if (currentDate) {
+      setTaskDate(currentDate);
+    }
   };
 
   return (
@@ -60,13 +68,13 @@ export default function EditScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={{ flex: 1 }}>
-              {taskDate.toDateString()}
+              {taskDate ? taskDate.toDateString() : 'Select a date'}
             </Text>
             <FontAwesome name="calendar" size={24} color="black" />
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={taskDate}
+              value={taskDate || new Date()}
               mode="date"
               display="default"
               onChange={onChangeDate}
@@ -130,7 +138,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8, // Added margin to space label from the input
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -142,10 +150,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 120, // Increased height for better appearance
+    height: 120,
     textAlignVertical: 'top',
-    paddingTop: 12, // Added padding to avoid text touching the top edge
-    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   calendarInput: {
     flexDirection: 'row',

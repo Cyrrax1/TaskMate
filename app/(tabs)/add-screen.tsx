@@ -7,7 +7,7 @@ import { useTaskContext } from '../TaskContext'; // Import TaskContext
 
 export default function AddScreen() {
   const [taskTitle, setTaskTitle] = useState('');
-  const [taskDate, setTaskDate] = useState(new Date());
+  const [taskDate, setTaskDate] = useState<Date | null>(null);
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -15,23 +15,29 @@ export default function AddScreen() {
   const { addTask } = useTaskContext(); // Use TaskContext
 
   const handleSave = () => {
-    addTask(taskTitle, taskDate.toISOString().split('T')[0], isPrioritized);
-    router.push('/home-screen'); // Zurück zur Startseite nach dem Speichern
+    if (taskTitle && taskDate) {
+      addTask(taskTitle, taskDate.toISOString().split('T')[0], isPrioritized);
+      setTaskTitle(''); // Reset the title
+      setTaskDate(null); // Reset the date
+      setTaskDescription(''); // Reset the description
+      setIsPrioritized(false); // Reset priority
+      router.push('/home-screen'); // Back to the home screen after saving
+    }
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || taskDate;
-    setShowDatePicker(Platform.OS === 'ios'); // On iOS, keep the picker open
-    setTaskDate(currentDate);
+    setShowDatePicker(Platform.OS === 'ios');
+    if (currentDate) {
+      setTaskDate(currentDate);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Title */}
         <Text style={styles.title}>Add</Text>
 
-        {/* Task Title Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Title</Text>
           <TextInput
@@ -42,7 +48,6 @@ export default function AddScreen() {
           />
         </View>
 
-        {/* Calendar Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Calendar</Text>
           <TouchableOpacity
@@ -50,13 +55,13 @@ export default function AddScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={{ flex: 1 }}>
-              {taskDate.toDateString()} {/* Display the selected date */}
+              {taskDate ? taskDate.toDateString() : 'Select a date'}
             </Text>
             <FontAwesome name="calendar" size={24} color="black" />
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={taskDate}
+              value={taskDate || new Date()}
               mode="date"
               display="default"
               onChange={onChangeDate}
@@ -64,7 +69,6 @@ export default function AddScreen() {
           )}
         </View>
 
-        {/* Task Description Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -76,7 +80,6 @@ export default function AddScreen() {
           />
         </View>
 
-        {/* Prioritize Toggle */}
         <View style={styles.priorityContainer}>
           <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
@@ -84,7 +87,6 @@ export default function AddScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Action Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8, // Added margin to space label from the input
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -135,10 +137,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 120, // Increased height for better appearance
+    height: 120,
     textAlignVertical: 'top',
-    paddingTop: 12, // Added padding to avoid text touching the top edge
-    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   calendarInput: {
     flexDirection: 'row',

@@ -78,7 +78,15 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       const updatedTasks = prevTasks.map(task =>
         task.id === id ? { ...task, title, date, prioritized, description } : task
       );
-      return [...updatedTasks]; // Return a new array to trigger a state change
+  
+      // Sort tasks to keep prioritized ones at the top
+      updatedTasks.sort((a, b) => {
+        if (a.prioritized && !b.prioritized) return -1;
+        if (!a.prioritized && b.prioritized) return 1;
+        return 0;
+      });
+  
+      return updatedTasks;
     });
   };
 
