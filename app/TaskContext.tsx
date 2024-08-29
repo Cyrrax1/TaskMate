@@ -5,10 +5,11 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface Task {
   id: string;
   title: string;
-  date: string;  // Date format 'YYYY-MM-DD'
+  date: string; // Date format 'YYYY-MM-DD'
   done: boolean;
   prioritized?: boolean;
   description?: string;
+  imageUri?: string; // Add imageUri to store the image path
 }
 
 interface TaskContextProps {
@@ -17,8 +18,8 @@ interface TaskContextProps {
   toggleTaskDone: (taskId: string) => void;
   archiveTask: (taskId: string) => void;
   unarchiveTask: (taskId: string) => void;
-  addTask: (title: string, date: string, prioritized?: boolean) => void;
-  updateTask: (id: string, title: string, date: string, prioritized?: boolean, description?: string) => void;
+  addTask: (title: string, date: string, prioritized?: boolean, description?: string, imageUri?: string) => void;
+  updateTask: (id: string, title: string, date: string, prioritized?: boolean, description?: string, imageUri?: string) => void;
   deleteTask: (taskId: string) => void;
 }
 
@@ -60,7 +61,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addTask = (title: string, date: string, prioritized = false) => {
+  const addTask = (title: string, date: string, prioritized = false, description = '', imageUri = '') => {
     setTasks(prevTasks => [
       ...prevTasks,
       {
@@ -69,23 +70,25 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         date,
         done: false,
         prioritized,
+        description,
+        imageUri,
       }
     ]);
   };
 
-  const updateTask = (id: string, title: string, date: string, prioritized = false, description = '') => {
+  const updateTask = (id: string, title: string, date: string, prioritized = false, description = '', imageUri = '') => {
     setTasks(prevTasks => {
       const updatedTasks = prevTasks.map(task =>
-        task.id === id ? { ...task, title, date, prioritized, description } : task
+        task.id === id ? { ...task, title, date, prioritized, description, imageUri } : task
       );
-  
+
       // Sort tasks to keep prioritized ones at the top
       updatedTasks.sort((a, b) => {
         if (a.prioritized && !b.prioritized) return -1;
         if (!a.prioritized && b.prioritized) return 1;
         return 0;
       });
-  
+
       return updatedTasks;
     });
   };

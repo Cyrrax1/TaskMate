@@ -1,8 +1,11 @@
+// EditScreen.tsx
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker'; // Import Image Picker
 import { useTaskContext } from '../TaskContext';
 
 export default function EditScreen() {
@@ -15,26 +18,29 @@ export default function EditScreen() {
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null); // State to store selected image URI
 
   useEffect(() => {
     if (task) {
       try {
-        const parsedTask = JSON.parse(task); // Parse the task JSON string
-        setTaskTitle(parsedTask.title || ''); // Set title
-        setTaskDate(parsedTask.date ? new Date(parsedTask.date) : new Date()); // Set date
-        setTaskDescription(parsedTask.description || ''); // Set description
-        setIsPrioritized(parsedTask.prioritized || false); // Set priority
+        const parsedTask = JSON.parse(task); 
+        setTaskTitle(parsedTask.title || '');
+        setTaskDate(parsedTask.date ? new Date(parsedTask.date) : new Date());
+        setTaskDescription(parsedTask.description || '');
+        setIsPrioritized(parsedTask.prioritized || false);
+        setImageUri(parsedTask.imageUri || null); // Ensure imageUri is set
       } catch (error) {
         console.error('Error parsing task:', error);
       }
     }
   }, [task]);
-
+  
+  // Handle Save function
   const handleSave = () => {
     if (taskDate) {
-      const parsedTask = JSON.parse(task); // Parse the task to get the correct id
-      updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription);
-      router.push('/home-screen'); // Navigate back to the home screen after saving
+      const parsedTask = JSON.parse(task); 
+      updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription, imageUri);
+      router.push('/home-screen');
     }
   };
 
@@ -43,6 +49,45 @@ export default function EditScreen() {
     setShowDatePicker(Platform.OS === 'ios');
     if (currentDate) {
       setTaskDate(currentDate);
+    }
+  };
+
+  // Function to handle image picking
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri); // Set the selected image URI
+    }
+  };
+
+  // Function to handle taking a photo
+  const takePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access the camera is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri); // Set the captured image URI
     }
   };
 
@@ -98,6 +143,19 @@ export default function EditScreen() {
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
             <FontAwesome name={isPrioritized ? "star" : "star-o"} size={24} color="black" />
           </TouchableOpacity>
+        </View>
+
+        {/* Image Picker Section */}
+        <View style={styles.imagePickerContainer}>
+          {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
+          <View style={styles.imageButtonsContainer}>
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+              <Text style={styles.imageButtonText}>Pick an Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+              <Text style={styles.imageButtonText}>Take a Photo</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>
@@ -171,6 +229,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 30,
+  },
+  imagePickerContainer: {
+    marginBottom: 20,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  imageButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  imageButton: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    backgroundColor: '#CDCABE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageButtonText: {
+    color: '#000',
+    fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',
