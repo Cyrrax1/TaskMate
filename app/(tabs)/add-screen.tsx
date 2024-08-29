@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 40,   // Adjust this margin to align it with your HomeScreen title
+    marginTop: 40,
     marginBottom: 20,
   },
   inputContainer: {
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8, // Added margin to space label from the input
   },
   input: {
     width: '100%',
@@ -135,8 +135,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 100,
+    height: 120, // Increased height for better appearance
     textAlignVertical: 'top',
+    paddingTop: 12, // Added padding to avoid text touching the top edge
+    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
   },
   calendarInput: {
     flexDirection: 'row',
