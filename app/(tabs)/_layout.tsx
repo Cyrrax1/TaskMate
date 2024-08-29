@@ -20,6 +20,10 @@ export default function RootLayout() {
               iconName = 'calendar';
             } else if (route.name === 'premium-screen') {
               iconName = 'star';
+            } else if (route.name === 'edit-screen') {
+              iconName = 'edit';
+            } else if (route.name === 'add-screen') {
+              iconName = 'star';
             }
 
             return <FontAwesome name={iconName} size={size} color={color} />;
@@ -32,6 +36,8 @@ export default function RootLayout() {
         <Tabs.Screen name="archived-screen" options={{ tabBarLabel: 'Archived' }} />
         <Tabs.Screen name="calendar-screen" options={{ tabBarLabel: 'Calendar' }} />
         <Tabs.Screen name="premium-screen" options={{ tabBarLabel: 'Premium' }} />
+        <Tabs.Screen name="add-screen" options={{ tabBarButton: () => null }} />
+        <Tabs.Screen name="edit-screen" options={{ tabBarButton: () => null }} />
       </Tabs>
     </TaskProvider>
   );

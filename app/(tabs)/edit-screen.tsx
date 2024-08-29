@@ -1,5 +1,3 @@
-// EditScreen.tsx
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';

@@ -13,40 +13,48 @@ export default function ArchivedScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Archived</Text>
-      <FlatList
-        data={archivedTasks}
-        keyExtractor={item => item.id} // Ensure unique ID is used
-        renderItem={({ item }) => (
-          <View style={[styles.taskContainer, styles.taskContainerDone]}>
-            <Text style={[styles.taskText, styles.taskTextDone]}>
-              {item.title}
-            </Text>
-            <View style={styles.taskIcons}>
-              <FontAwesome
-                name={item.prioritized ? "star" : "star-o"}
-                size={24}
-                color={item.prioritized ? "gold" : "black"}
-                style={styles.iconSpacing}
-              />
-              <FontAwesome
-                name="pencil"
-                size={24}
-                color="black"
-                style={styles.iconSpacing}
-                onPress={() => console.log(`Edit ${item.title}`)}
-              />
-              <TouchableOpacity onPress={() => handleUnarchive(item.id)}>
+      
+      {archivedTasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No archived tasks yet!</Text>
+          <Text style={styles.emptySubText}>Archived tasks will appear here.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={archivedTasks}
+          keyExtractor={item => item.id} // Ensure unique ID is used
+          renderItem={({ item }) => (
+            <View style={[styles.taskContainer, styles.taskContainerDone]}>
+              <Text style={[styles.taskText, styles.taskTextDone]}>
+                {item.title}
+              </Text>
+              <View style={styles.taskIcons}>
                 <FontAwesome
-                  name="check-square"
+                  name={item.prioritized ? "star" : "star-o"}
                   size={24}
-                  color="green"
+                  color={item.prioritized ? "gold" : "black"}
                   style={styles.iconSpacing}
                 />
-              </TouchableOpacity>
+                <FontAwesome
+                  name="pencil"
+                  size={24}
+                  color="black"
+                  style={styles.iconSpacing}
+                  onPress={() => console.log(`Edit ${item.title}`)}
+                />
+                <TouchableOpacity onPress={() => handleUnarchive(item.id)}>
+                  <FontAwesome
+                    name="check-square"
+                    size={24}
+                    color="green"
+                    style={styles.iconSpacing}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 }
@@ -63,6 +71,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptySubText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#555',
   },
   taskContainer: {
     flexDirection: 'row',

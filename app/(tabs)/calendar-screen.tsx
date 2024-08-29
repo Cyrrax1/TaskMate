@@ -4,13 +4,13 @@ import { Calendar } from 'react-native-calendars';
 import { useTaskContext } from '../TaskContext';
 
 export default function CalendarScreen() {
-  const { tasks } = useTaskContext(); 
+  const { tasks } = useTaskContext();
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Task-Daten im Kalender markieren
+  // Mark tasks on the calendar
   const markedDates = tasks.reduce((acc, task) => {
-    const date = task.date; 
+    const date = task.date;
     if (date) {
       acc[date] = { marked: true, dotColor: 'blue', color: '#70d7c7' };
     }
@@ -26,23 +26,26 @@ export default function CalendarScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Calendar</Text>
-      <Calendar
-        markedDates={markedDates}
-        theme={{
-          todayTextColor: 'red',
-          arrowColor: 'blue',
-          dotColor: 'red',
-          selectedDayBackgroundColor: 'blue',
-          selectedDayTextColor: '#ffffff',
-          dayTextColor: '#2d4150',
-          textDisabledColor: '#d9e1e8',
-          monthTextColor: 'blue',
-          indicatorColor: 'blue',
-        }}
-        onDayPress={handleDayPress}
-      />
+      <View style={styles.calendarWrapper}>
+        <Calendar
+          markedDates={markedDates}
+          theme={{
+            todayTextColor: 'red',
+            arrowColor: 'blue',
+            dotColor: 'red',
+            selectedDayBackgroundColor: 'blue',
+            selectedDayTextColor: '#ffffff',
+            dayTextColor: '#2d4150',
+            textDisabledColor: '#d9e1e8',
+            monthTextColor: 'blue',
+            indicatorColor: 'blue',
+          }}
+          onDayPress={handleDayPress}
+          style={styles.calendar}
+        />
+      </View>
 
-      {/* Modal für Task-Details */}
+      {/* Modal for task details */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -81,8 +84,15 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 40,   
+    marginTop: 20,
     marginBottom: 20,
+  },
+  calendarWrapper: {
+    flex: 1, // Takes available space to adjust positioning
+    justifyContent: 'center', // Centers the calendar vertically
+  },
+  calendar: {
+    borderRadius: 15, // Keeps the edges rounded
   },
   modalContainer: {
     flex: 1,
