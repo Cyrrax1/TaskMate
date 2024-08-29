@@ -1,16 +1,9 @@
 import { Tabs } from "expo-router";
 import { TaskProvider } from "../TaskContext";
 import { FontAwesome } from '@expo/vector-icons';
-import { TouchableOpacity, Text } from "react-native";
-import { useRouter } from "expo-router";
+import React from "react";
 
 export default function RootLayout() {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    router.replace('/'); // Navigate back to the login screen
-  };
-
   return (
     <TaskProvider>
       <Tabs
@@ -23,8 +16,14 @@ export default function RootLayout() {
               iconName = 'home';
             } else if (route.name === 'archived-screen') {
               iconName = 'archive';
-            } else if (route.name === 'calendar') {
+            } else if (route.name === 'calendar-screen') {
               iconName = 'calendar';
+            } else if (route.name === 'premium-screen') {
+              iconName = 'star';
+            } else if (route.name === 'edit-screen') {
+              iconName = 'edit';
+            } else if (route.name === 'add-screen') {
+              iconName = 'star';
             }
 
             return <FontAwesome name={iconName} size={size} color={color} />;
@@ -35,26 +34,10 @@ export default function RootLayout() {
       >
         <Tabs.Screen name="home-screen" options={{ tabBarLabel: 'Home' }} />
         <Tabs.Screen name="archived-screen" options={{ tabBarLabel: 'Archived' }} />
-        <Tabs.Screen name="calendar" options={{ tabBarLabel: 'Calendar' }} />
-        {/* Custom Logout Button */}
-        <Tabs.Screen
-          name="logout"
-          options={{
-            tabBarButton: () => (
-              <TouchableOpacity
-                onPress={handleLogout}
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <FontAwesome name="sign-out" size={24} color="tomato" />
-                <Text style={{ color: 'tomato', fontSize: 12 }}>Logout</Text>
-              </TouchableOpacity>
-            ),
-          }}
-        />
+        <Tabs.Screen name="calendar-screen" options={{ tabBarLabel: 'Calendar' }} />
+        <Tabs.Screen name="premium-screen" options={{ tabBarLabel: 'Premium' }} />
+        <Tabs.Screen name="add-screen" options={{ tabBarButton: () => null }} />
+        <Tabs.Screen name="edit-screen" options={{ tabBarButton: () => null }} />
       </Tabs>
     </TaskProvider>
   );

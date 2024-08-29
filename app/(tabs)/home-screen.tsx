@@ -5,12 +5,20 @@ import { useTaskContext } from '../TaskContext';
 import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
-  const { tasks, toggleTaskDone, archiveTask } = useTaskContext();
+  const { tasks, toggleTaskDone, archiveTask, deleteTask } = useTaskContext();
   const router = useRouter();
 
   const handleToggleDone = (taskId: string) => {
     toggleTaskDone(taskId);
     setTimeout(() => archiveTask(taskId), 500);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(taskId);
+  };
+
+  const handleLogout = () => {
+    router.replace('/'); // Navigates to the login page
   };
 
   const renderItem = ({ item }: { item: typeof tasks[0] }) => (
@@ -19,6 +27,14 @@ export default function HomeScreen() {
         {item.title}
       </Text>
       <View style={styles.taskIcons}>
+        <TouchableOpacity onPress={() => handleDeleteTask(item.id)}>
+          <FontAwesome
+            name="trash"
+            size={24}
+            color="red"
+            style={styles.iconSpacing}
+          />
+        </TouchableOpacity>
         <FontAwesome
           name="star-o"
           size={24}
@@ -46,18 +62,32 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Styled Logout button at the top left */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <FontAwesome name="sign-out" size={24} color="black" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Home</Text>
-      <FlatList
-        data={tasks}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        removeClippedSubviews={true}
-        initialNumToRender={10}
-        maxToRenderPerBatch={5}
-        windowSize={10}
-        scrollEnabled={true}
-        contentContainerStyle={styles.flatListContent}
-      />
+
+      {tasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Welcome to TaskMate!</Text>
+          <Text style={styles.emptySubText}>Press the "+" button below to create a new task.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={item => item.id}
+          renderItem={renderItem}
+          removeClippedSubviews={true}
+          initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          windowSize={10}
+          scrollEnabled={true}
+          contentContainerStyle={styles.flatListContent}
+        />
+      )}
+
       <TouchableOpacity style={styles.addButton} onPress={() => router.push('/add-screen')}>
         <FontAwesome name="plus" size={24} color="black" />
       </TouchableOpacity>
@@ -71,6 +101,19 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#E6E4DE',
   },
+  logoutButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15, // Rounded edges
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, // Soft shadow
+    shadowRadius: 4,
+    elevation: 3, // For Android shadow effect
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -78,8 +121,24 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 20,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptySubText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#555',
+  },
   flatListContent: {
-    paddingBottom: 80, // Add padding to ensure the last item isn't obstructed by the add button
+    paddingBottom: 80,
   },
   taskContainer: {
     flexDirection: 'row',

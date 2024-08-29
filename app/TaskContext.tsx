@@ -1,10 +1,14 @@
+// TaskContext.tsx
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface Task {
   id: string;
   title: string;
+  date: string;  // Date format 'YYYY-MM-DD'
   done: boolean;
   prioritized?: boolean;
+  description?: string;
 }
 
 interface TaskContextProps {
@@ -13,7 +17,9 @@ interface TaskContextProps {
   toggleTaskDone: (taskId: string) => void;
   archiveTask: (taskId: string) => void;
   unarchiveTask: (taskId: string) => void;
-  addTask: (title: string, prioritized?: boolean) => void;
+  addTask: (title: string, date: string, prioritized?: boolean) => void;
+  updateTask: (id: string, title: string, date: string, prioritized?: boolean, description?: string) => void;
+  deleteTask: (taskId: string) => void;
 }
 
 const TaskContext = createContext<TaskContextProps | undefined>(undefined);
@@ -27,14 +33,7 @@ export const useTaskContext = () => {
 };
 
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: '1', title: 'To-do Task 1', done: false },
-    { id: '2', title: 'To-do Task 2', done: false },
-    { id: '3', title: 'To-do Task 3', done: false },
-    { id: '4', title: 'To-do Task 4', done: false },
-    { id: '5', title: 'To-do Task 5', done: false },
-  ]);
-
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
 
   const toggleTaskDone = (taskId: string) => {
@@ -61,20 +60,45 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const addTask = (title: string, prioritized = false) => {
+  const addTask = (title: string, date: string, prioritized = false) => {
     setTasks(prevTasks => [
       ...prevTasks,
       {
-        id: String(prevTasks.length + 1 + Math.random()), // Ensures unique ID
+        id: String(prevTasks.length + 1 + Math.random()), // Ensure unique ID
         title,
+        date,
         done: false,
         prioritized,
       }
     ]);
   };
 
+  const updateTask = (id: string, title: string, date: string, prioritized = false, description = '') => {
+    setTasks(prevTasks => {
+      const updatedTasks = prevTasks.map(task =>
+        task.id === id ? { ...task, title, date, prioritized, description } : task
+      );
+      return [...updatedTasks]; // Return a new array to trigger a state change
+    });
+  };
+
+  const deleteTask = (taskId: string) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+  };
+
   return (
-    <TaskContext.Provider value={{ tasks, archivedTasks, toggleTaskDone, archiveTask, unarchiveTask, addTask }}>
+    <TaskContext.Provider
+      value={{
+        tasks,
+        archivedTasks,
+        toggleTaskDone,
+        archiveTask,
+        unarchiveTask,
+        addTask,
+        updateTask,
+        deleteTask,
+      }}
+    >
       {children}
     </TaskContext.Provider>
   );
