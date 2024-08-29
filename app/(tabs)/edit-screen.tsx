@@ -1,40 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTaskContext } from '../TaskContext';
 
 export default function EditScreen() {
+  const router = useRouter();
+  const { updateTask } = useTaskContext();
+  const { task } = useLocalSearchParams();
+
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDate, setTaskDate] = useState(new Date());
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (task) {
+      const parsedTask = JSON.parse(task); // Parse the task JSON string
+      setTaskTitle(parsedTask.title);
+      setTaskDate(new Date(parsedTask.date));
+      setTaskDescription(parsedTask.description || '');
+      setIsPrioritized(parsedTask.prioritized || false);
+    }
+  }, [task]);
 
   const handleSave = () => {
-    // Save task logic here
-    router.push('/home-screen'); // Navigate back to HomeScreen after saving
+    const parsedTask = JSON.parse(task); // Parse the task to get the correct id
+    updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription);
+    router.push('/home-screen'); // Navigate back to the home screen after saving
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || taskDate;
-    setShowDatePicker(Platform.OS === 'ios'); // On iOS, keep the picker open
+    setShowDatePicker(Platform.OS === 'ios');
     setTaskDate(currentDate);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Hamburger Menu */}
-        <TouchableOpacity style={styles.hamburgerMenu} onPress={() => console.log('Hamburger menu pressed')}>
-          <FontAwesome name="bars" size={24} color="black" />
-        </TouchableOpacity>
-
-        {/* Title */}
         <Text style={styles.title}>Edit</Text>
 
-        {/* Task Title Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Title</Text>
           <TextInput
@@ -45,7 +53,6 @@ export default function EditScreen() {
           />
         </View>
 
-        {/* Calendar Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Calendar</Text>
           <TouchableOpacity
@@ -53,7 +60,7 @@ export default function EditScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={{ flex: 1 }}>
-              {taskDate.toDateString()} {/* Display the selected date */}
+              {taskDate.toDateString()}
             </Text>
             <FontAwesome name="calendar" size={24} color="black" />
           </TouchableOpacity>
@@ -67,7 +74,6 @@ export default function EditScreen() {
           )}
         </View>
 
-        {/* Task Description Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -79,7 +85,6 @@ export default function EditScreen() {
           />
         </View>
 
-        {/* Prioritize Toggle */}
         <View style={styles.priorityContainer}>
           <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
@@ -87,7 +92,6 @@ export default function EditScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Action Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -110,17 +114,12 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#E6E4DE',
   },
-  hamburgerMenu: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginVertical: 20,
+    marginTop: 40,
+    marginBottom: 20,
   },
   inputContainer: {
     marginBottom: 20,
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8, // Added margin to space label from the input
   },
   input: {
     width: '100%',
@@ -143,8 +142,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 100,
+    height: 120, // Increased height for better appearance
     textAlignVertical: 'top',
+    paddingTop: 12, // Added padding to avoid text touching the top edge
+    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
   },
   calendarInput: {
     flexDirection: 'row',

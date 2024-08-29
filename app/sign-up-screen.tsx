@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 
-export default function TaskMateLogin() {
+export default function SignUpScreen() {
   const [email, setEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [generalError, setGeneralError] = useState('');
@@ -12,64 +13,39 @@ export default function TaskMateLogin() {
 
   const db = SQLite.openDatabaseSync('taskmate.db');
 
-  useEffect(() => {
-    const initDb = async () => {
-      try {
-        await db.execAsync(`
-          CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL
-          );
-        `);
-        await db.runAsync(`INSERT OR IGNORE INTO users (email, password) VALUES ('test@g.ch', 'test');`);
-      } catch (error) {
-        console.error('Error initializing the database:', error);
-      }
-    };
-
-    initDb();
-  }, []);
-
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email');
       return;
     }
+
+    if (email !== confirmEmail) {
+      setEmailError('Emails do not match');
+      return;
+    }
+
     setEmailError('');
     setGeneralError('');
 
     try {
-      const result = await db.getFirstAsync(
-        'SELECT * FROM users WHERE email = ? AND password = ?',
-        [email, password]
-      );
-
-      if (result) {
-        router.replace('/home-screen'); // Navigate to the home screen after login
-      } else {
-        setGeneralError('Invalid credentials. Please try again.');
-      }
+      await db.runAsync('INSERT INTO users (email, password) VALUES (?, ?)', [email, password]);
+      router.replace('/'); // Navigate back to login after successful sign-up
     } catch (error) {
-      console.error('Error during login:', error);
-      setGeneralError('An error occurred while logging in. Please try again.');
+      console.error('Error during sign up:', error);
+      setGeneralError('An error occurred during sign-up. Please try again.');
     }
-  };
-
-  const handleSignUpNavigation = () => {
-    router.push('/sign-up-screen'); // Ensure this matches the correct path
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome to</Text>
       <Text style={styles.titleText}>TaskMate</Text>
-      <Text style={styles.loginText}>Log in</Text>
+      <Text style={styles.loginText}>Sign Up</Text>
 
       <TextInput
         style={[styles.input, emailError ? styles.inputError : null]}
@@ -77,6 +53,13 @@ export default function TaskMateLogin() {
         placeholderTextColor="#000"
         value={email}
         onChangeText={(text) => setEmail(text)}
+      />
+      <TextInput
+        style={[styles.input, emailError ? styles.inputError : null]}
+        placeholder="Confirm Email"
+        placeholderTextColor="#000"
+        value={confirmEmail}
+        onChangeText={(text) => setConfirmEmail(text)}
       />
       {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
@@ -91,12 +74,12 @@ export default function TaskMateLogin() {
 
       {generalError ? <Text style={styles.errorText}>{generalError}</Text> : null}
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.buttonText}>LOG IN</Text>
+      <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
+        <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.signupButton} onPress={handleSignUpNavigation}>
-        <Text style={styles.signupText}>Sign Up</Text>
+      <TouchableOpacity style={styles.signupButton} onPress={() => router.push('/')}>
+        <Text style={styles.signupText}>Log In</Text>
       </TouchableOpacity>
     </View>
   );
