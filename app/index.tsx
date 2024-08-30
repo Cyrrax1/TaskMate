@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SQLite from 'expo-sqlite';
 import { useRouter } from 'expo-router';
 
@@ -15,14 +16,14 @@ export default function TaskMateLogin() {
   useEffect(() => {
     const initDb = async () => {
       try {
-        await db.execAsync(`
+        await db.execSync(`
           CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL
           );
         `);
-        await db.runAsync(`INSERT OR IGNORE INTO users (email, password) VALUES ('test@g.ch', 'test');`);
+        await db.runSync(`INSERT OR IGNORE INTO users (email, password) VALUES ('test@g.ch', 'test');`);
       } catch (error) {
         console.error('Error initializing the database:', error);
       }
@@ -44,13 +45,15 @@ export default function TaskMateLogin() {
     setEmailError('');
     setGeneralError('');
 
+    
     try {
+
       const result = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
         [email, password]
       );
-
       if (result) {
+        AsyncStorage.setItem('userId', result.id.toString());
         router.replace('/home-screen'); // Navigate to the home screen after login
       } else {
         setGeneralError('Invalid credentials. Please try again.');
