@@ -10,7 +10,7 @@ export default function HomeScreen() {
 
   const handleToggleDone = (taskId: string) => {
     toggleTaskDone(taskId);
-    setTimeout(() => archiveTask(taskId), 500);
+    setTimeout(() => archiveTask(taskId), 500); // Archive task after toggling done
   };
 
   const handleDeleteTask = (taskId: string) => {

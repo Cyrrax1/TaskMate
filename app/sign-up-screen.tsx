@@ -11,14 +11,14 @@ export default function SignUpScreen() {
   const [generalError, setGeneralError] = useState('');
   const router = useRouter();
 
-  const db = SQLite.openDatabaseSync('taskmate.db');
+  const db = SQLite.openDatabaseSync('taskmate.db'); // Open the database synchronously
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSignUp = async () => {
+  const handleSignUp = () => {
     if (!validateEmail(email)) {
       setEmailError('Please enter a valid email');
       return;
@@ -33,7 +33,8 @@ export default function SignUpScreen() {
     setGeneralError('');
 
     try {
-      await db.runAsync('INSERT INTO users (email, password) VALUES (?, ?)', [email, password]);
+      db.runSync('INSERT INTO users (email, password) VALUES (?, ?)', email, password);
+      console.log('User signed up successfully');
       router.replace('/'); // Navigate back to login after successful sign-up
     } catch (error) {
       console.error('Error during sign up:', error);
