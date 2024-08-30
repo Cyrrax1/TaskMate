@@ -8,9 +8,12 @@ export default function HomeScreen() {
   const { tasks, toggleTaskDone, archiveTask, deleteTask, updateTask } = useTaskContext();
   const router = useRouter();
 
+  // Sort tasks based on priority
+  const sortedTasks = [...tasks].sort((a, b) => (b.prioritized ? 1 : 0) - (a.prioritized ? 1 : 0));
+
   const handleToggleDone = (taskId: string) => {
     toggleTaskDone(taskId);
-    setTimeout(() => archiveTask(taskId), 500);
+    setTimeout(() => archiveTask(taskId), 500); // Archive task after toggling done
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -76,7 +79,7 @@ export default function HomeScreen() {
         </View>
       ) : (
         <FlatList
-          data={tasks}
+          data={sortedTasks} // Use sorted tasks to render
           keyExtractor={item => item.id}
           renderItem={renderItem}
           removeClippedSubviews={true}

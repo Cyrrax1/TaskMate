@@ -1,6 +1,6 @@
-// TaskContext.tsx
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import * as SQLite from 'expo-sqlite';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Task {
   id: string;
@@ -9,7 +9,7 @@ interface Task {
   done: boolean;
   prioritized?: boolean;
   description?: string;
-  imageUri?: string; // Add imageUri to store the image path
+  imageUri?: string; // Image URI path
 }
 
 interface TaskContextProps {
@@ -33,9 +33,142 @@ export const useTaskContext = () => {
   return context;
 };
 
+// Open the database synchronously
+const db = SQLite.openDatabaseSync('taskmate.db');
+
 export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([]);
+  const [userId, setUserId] = useState<number | null>(null); // State to track the current user's ID
+
+  useEffect(() => {
+    initializeDatabase();
+    getCurrentUserId().then((userId) => {
+      setUserId(userId ? Number(userId) : null);
+      if (userId) {
+        loadTasks(Number(userId));
+      }
+    });
+  }, []);
+
+  const initializeDatabase = () => {
+    try {
+      db.execSync(`
+        CREATE TABLE IF NOT EXISTS tasks (
+          id TEXT PRIMARY KEY NOT NULL,
+          title TEXT,
+          date TEXT,
+          done INTEGER,
+          prioritized INTEGER,
+          description TEXT,
+          imageUri TEXT,
+          userId INTEGER,
+          FOREIGN KEY (userId) REFERENCES users(id)
+        );
+      `);
+      db.execSync(`
+        CREATE TABLE IF NOT EXISTS archived_tasks (
+          id TEXT PRIMARY KEY NOT NULL,
+          title TEXT,
+          date TEXT,
+          done INTEGER,
+          prioritized INTEGER,
+          description TEXT,
+          imageUri TEXT,
+          userId INTEGER,
+          FOREIGN KEY (userId) REFERENCES users(id)
+        );
+      `);
+    } catch (error) {
+      console.error('Error creating tables:', error);
+    }
+  };
+
+  const getCurrentUserId = async (): Promise<string | null> => {
+    return await AsyncStorage.getItem('userId');
+  };
+
+  const loadTasks = (currentUserId: number) => {
+    try {
+      const loadedTasks = db.getAllSync('SELECT * FROM tasks WHERE userId = ?', currentUserId);
+      console.log(`Loaded tasks for user ${currentUserId}:`, loadedTasks);
+      setTasks(
+        loadedTasks.map((task: any) => ({
+          ...task,
+          done: task.done === 1,
+          prioritized: task.prioritized === 1,
+        }))
+      );
+
+      const loadedArchivedTasks = db.getAllSync('SELECT * FROM archived_tasks WHERE userId = ?', currentUserId);
+      console.log(`Loaded archived tasks for user ${currentUserId}:`, loadedArchivedTasks);
+      setArchivedTasks(
+        loadedArchivedTasks.map((task: any) => ({
+          ...task,
+          done: task.done === 1,
+          prioritized: task.prioritized === 1,
+        }))
+      );
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+    }
+  };
+
+  const saveTaskToDatabase = (task: Task) => {
+    if (!userId) return;
+    try {
+      db.runSync(
+        'INSERT OR REPLACE INTO tasks (id, title, date, done, prioritized, description, imageUri, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+        task.id,
+        task.title,
+        task.date,
+        task.done ? 1 : 0,
+        task.prioritized ? 1 : 0,
+        task.description ?? null,
+        task.imageUri ?? null,
+        userId
+      );
+    } catch (error) {
+      console.error('Error saving task:', error);
+    }
+  };
+
+  const deleteTaskFromDatabase = (taskId: string) => {
+    if (!userId) return;
+    try {
+      db.runSync('DELETE FROM tasks WHERE id = ? AND userId = ?', taskId, userId);
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
+  const deleteArchivedTaskFromDatabase = (taskId: string) => {
+    if (!userId) return;
+    try {
+      db.runSync('DELETE FROM archived_tasks WHERE id = ? AND userId = ?', taskId, userId);
+    } catch (error) {
+      console.error('Error deleting archived task:', error);
+    }
+  };
+
+  const saveArchivedTaskToDatabase = (task: Task) => {
+    if (!userId) return;
+    try {
+      db.runSync(
+        'INSERT OR REPLACE INTO archived_tasks (id, title, date, done, prioritized, description, imageUri, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+        task.id,
+        task.title,
+        task.date,
+        task.done ? 1 : 0,
+        task.prioritized ? 1 : 0,
+        task.description ?? null,
+        task.imageUri ?? null,
+        userId
+      );
+    } catch (error) {
+      console.error('Error saving archived task:', error);
+    }
+  };
 
   const toggleTaskDone = (taskId: string) => {
     setTasks(prevTasks =>
@@ -50,30 +183,37 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     if (taskToArchive) {
       setArchivedTasks(prevArchived => [...prevArchived, { ...taskToArchive, done: true }]);
       setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+      saveArchivedTaskToDatabase(taskToArchive);
+      deleteTaskFromDatabase(taskId);
     }
   };
 
   const unarchiveTask = (taskId: string) => {
     const taskToUnarchive = archivedTasks.find(task => task.id === taskId);
     if (taskToUnarchive) {
-      setTasks(prevTasks => [...prevTasks, { ...taskToUnarchive, done: false }]);
+      // Reset the done status to false when unarchiving
+      const updatedTask = { ...taskToUnarchive, done: false }; // Reset done status to false
+
+      setTasks(prevTasks => [...prevTasks, updatedTask]);
       setArchivedTasks(prevArchived => prevArchived.filter(task => task.id !== taskId));
+
+      saveTaskToDatabase(updatedTask);
+      deleteArchivedTaskFromDatabase(taskId);
     }
   };
 
   const addTask = (title: string, date: string, prioritized = false, description = '', imageUri = '') => {
-    setTasks(prevTasks => [
-      ...prevTasks,
-      {
-        id: String(prevTasks.length + 1 + Math.random()), // Ensure unique ID
-        title,
-        date,
-        done: false,
-        prioritized,
-        description,
-        imageUri,
-      }
-    ]);
+    const newTask: Task = {
+      id: String(Date.now()),
+      title,
+      date,
+      done: false,
+      prioritized,
+      description,
+      imageUri,
+    };
+    setTasks(prevTasks => [...prevTasks, newTask]);
+    saveTaskToDatabase(newTask);
   };
 
   const updateTask = (id: string, title: string, date: string, prioritized = false, description = '', imageUri = '') => {
@@ -81,20 +221,18 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       const updatedTasks = prevTasks.map(task =>
         task.id === id ? { ...task, title, date, prioritized, description, imageUri } : task
       );
-
-      // Sort tasks to keep prioritized ones at the top
-      updatedTasks.sort((a, b) => {
-        if (a.prioritized && !b.prioritized) return -1;
-        if (!a.prioritized && b.prioritized) return 1;
-        return 0;
-      });
-
-      return updatedTasks;
+  
+      // Save updated tasks to the database
+      updatedTasks.forEach(task => saveTaskToDatabase(task));
+      
+      // Sort tasks to ensure prioritized tasks are always at the top
+      return updatedTasks.sort((a, b) => (b.prioritized ? 1 : 0) - (a.prioritized ? 1 : 0));
     });
   };
 
   const deleteTask = (taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    deleteTaskFromDatabase(taskId);
   };
 
   return (
@@ -114,3 +252,5 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     </TaskContext.Provider>
   );
 };
+
+export default TaskProvider;

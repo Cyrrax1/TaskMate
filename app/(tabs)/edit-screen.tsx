@@ -1,7 +1,5 @@
-// EditScreen.tsx
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -28,7 +26,7 @@ export default function EditScreen() {
         setTaskDate(parsedTask.date ? new Date(parsedTask.date) : new Date());
         setTaskDescription(parsedTask.description || '');
         setIsPrioritized(parsedTask.prioritized || false);
-        setImageUri(parsedTask.imageUri || null); // Ensure imageUri is set
+        setImageUri(parsedTask.imageUri || null); // Ensure imageUri is set from the task details
       } catch (error) {
         console.error('Error parsing task:', error);
       }
@@ -37,11 +35,19 @@ export default function EditScreen() {
   
   // Handle Save function
   const handleSave = () => {
-    if (taskDate) {
-      const parsedTask = JSON.parse(task); 
-      updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription, imageUri);
-      router.push('/home-screen');
+    // Validation check for task title and date
+    if (!taskTitle) {
+      Alert.alert('Validation Error', 'Please enter a task title.');
+      return;
     }
+    if (!taskDate) {
+      Alert.alert('Validation Error', 'Please select a date for the task.');
+      return;
+    }
+
+    const parsedTask = JSON.parse(task); 
+    updateTask(parsedTask.id, taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription, imageUri);
+    router.push('/home-screen');
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
@@ -147,7 +153,12 @@ export default function EditScreen() {
 
         {/* Image Picker Section */}
         <View style={styles.imagePickerContainer}>
-          {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
+          {/* Display the image preview if imageUri is available */}
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+          ) : (
+            <Text style={styles.noImageText}>No image selected</Text>
+          )}
           <View style={styles.imageButtonsContainer}>
             <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
               <Text style={styles.imageButtonText}>Pick an Image</Text>
@@ -237,6 +248,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     borderRadius: 10,
+    marginBottom: 10,
+  },
+  noImageText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#888',
     marginBottom: 10,
   },
   imageButtonsContainer: {
