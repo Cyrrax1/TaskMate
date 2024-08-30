@@ -75,8 +75,8 @@ export default function SignUpScreen() {
 
       {generalError ? <Text style={styles.errorText}>{generalError}</Text> : null}
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+      <TouchableOpacity style={styles.loginButton} onPress={handleSignUp} testID="sign-up-button">
+        <Text style={styles.buttonText}>Sign Up</Text>  
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.signupButton} onPress={() => router.push('/')}>
