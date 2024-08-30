@@ -23,6 +23,7 @@
     "expo": "~51.0.31",
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.9",
+    "expo-image-picker": "~15.0.7",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.23",
     "expo-splash-screen": "~0.27.5",
@@ -41,14 +42,14 @@
     "react-native-screens": "^3.34.0",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.12",
-    "styles": "^0.2.1",
-    "expo-image-picker": "~15.0.7"
+    "styles": "^0.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@testing-library/react-native": "^12.6.1",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.3.4",
+    "cypress": "^13.14.1",
     "jest": "^29.7.0",
     "jest-expo": "~51.0.4",
     "typescript": "~5.5.4"

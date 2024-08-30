@@ -63,7 +63,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.logoutButton} onPress={() => router.replace('/')}>
+      <TouchableOpacity testID="logout-button" style={styles.logoutButton} onPress={() => router.replace('/')}>
         <FontAwesome name="sign-out" size={24} color="black" />
       </TouchableOpacity>
 

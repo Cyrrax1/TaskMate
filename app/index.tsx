@@ -44,13 +44,15 @@ export default function TaskMateLogin() {
     setEmailError('');
     setGeneralError('');
 
+    
     try {
+
       const result = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
         [email, password]
       );
 
-      if (result) {
+      if (result) {        
         router.replace('/home-screen'); // Navigate to the home screen after login
       } else {
         setGeneralError('Invalid credentials. Please try again.');
