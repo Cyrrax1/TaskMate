@@ -217,8 +217,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       const updatedTasks = prevTasks.map(task =>
         task.id === id ? { ...task, title, date, prioritized, description, imageUri } : task
       );
+  
+      // Save updated tasks to the database
       updatedTasks.forEach(task => saveTaskToDatabase(task));
-      return updatedTasks;
+      
+      // Sort tasks to ensure prioritized tasks are always at the top
+      return updatedTasks.sort((a, b) => (b.prioritized ? 1 : 0) - (a.prioritized ? 1 : 0));
     });
   };
 

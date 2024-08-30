@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -17,16 +17,32 @@ export default function AddScreen() {
   const { addTask } = useTaskContext();
 
   const handleSave = () => {
-    if (taskTitle && taskDate) {
-      addTask(taskTitle, taskDate.toISOString().split('T')[0], isPrioritized, taskDescription, imageUri);
-      // Reset fields after saving
-      setTaskTitle('');
-      setTaskDate(null);
-      setTaskDescription('');
-      setIsPrioritized(false);
-      setImageUri(null);
-      router.push('/home-screen');
+    // Validation check for task title and date
+    if (!taskTitle) {
+      Alert.alert('Validation Error', 'Please enter a task title.');
+      return;
     }
+    if (!taskDate) {
+      Alert.alert('Validation Error', 'Please select a date for the task.');
+      return;
+    }
+
+    // Proceed to add task if validation passes
+    addTask(
+      taskTitle,
+      taskDate.toISOString().split('T')[0],
+      isPrioritized,
+      taskDescription,
+      imageUri // Use the current image URI
+    );
+
+    // Reset fields after saving
+    setTaskTitle('');
+    setTaskDate(null);
+    setTaskDescription('');
+    setIsPrioritized(false);
+    setImageUri(null);
+    router.push('/home-screen');
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
