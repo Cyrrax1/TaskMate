@@ -191,9 +191,13 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const unarchiveTask = (taskId: string) => {
     const taskToUnarchive = archivedTasks.find(task => task.id === taskId);
     if (taskToUnarchive) {
-      setTasks(prevTasks => [...prevTasks, { ...taskToUnarchive, done: false }]);
+      // Reset the done status to false when unarchiving
+      const updatedTask = { ...taskToUnarchive, done: false }; // Reset done status to false
+
+      setTasks(prevTasks => [...prevTasks, updatedTask]);
       setArchivedTasks(prevArchived => prevArchived.filter(task => task.id !== taskId));
-      saveTaskToDatabase(taskToUnarchive);
+
+      saveTaskToDatabase(updatedTask);
       deleteArchivedTaskFromDatabase(taskId);
     }
   };
