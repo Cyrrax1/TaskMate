@@ -22,7 +22,7 @@ export default function ArchivedScreen() {
       ) : (
         <FlatList
           data={archivedTasks}
-          keyExtractor={item => item.id} // Ensure unique ID is used
+          keyExtractor={(item, index) => item.id + index} // Ensure unique key by combining id and index
           renderItem={({ item }) => (
             <View style={[styles.taskContainer, styles.taskContainerDone]}>
               <Text style={[styles.taskText, styles.taskTextDone]}>

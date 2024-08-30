@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: 40, // Consistent with other screens
     marginBottom: 20,
   },
   calendarWrapper: {

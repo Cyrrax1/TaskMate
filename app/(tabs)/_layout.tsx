@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
-import { TaskProvider } from "../TaskContext";
+import  TaskProvider  from "../TaskContext";
 import { FontAwesome } from '@expo/vector-icons';
 import React from "react";
 
 export default function RootLayout() {
   return (
-    <TaskProvider>
+    <TaskProvider >
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,

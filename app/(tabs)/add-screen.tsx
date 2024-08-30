@@ -1,37 +1,106 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, ScrollView, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTaskContext } from '../TaskContext'; // Import TaskContext
+import * as ImagePicker from 'expo-image-picker'; // Import Image Picker
+import { useTaskContext } from '../TaskContext';
 
 export default function AddScreen() {
   const [taskTitle, setTaskTitle] = useState('');
-  const [taskDate, setTaskDate] = useState(new Date());
+  const [taskDate, setTaskDate] = useState<Date | null>(null);
   const [taskDescription, setTaskDescription] = useState('');
   const [isPrioritized, setIsPrioritized] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null); // State to store selected image URI
   const router = useRouter();
-  const { addTask } = useTaskContext(); // Use TaskContext
+  const { addTask } = useTaskContext();
 
   const handleSave = () => {
-    addTask(taskTitle, taskDate.toISOString().split('T')[0], isPrioritized);
-    router.push('/home-screen'); // Zurück zur Startseite nach dem Speichern
+    // Validation check for task title and date
+    if (!taskTitle) {
+      Alert.alert('Validation Error', 'Please enter a task title.');
+      return;
+    }
+    if (!taskDate) {
+      Alert.alert('Validation Error', 'Please select a date for the task.');
+      return;
+    }
+
+    // Proceed to add task if validation passes
+    addTask(
+      taskTitle,
+      taskDate.toISOString().split('T')[0],
+      isPrioritized,
+      taskDescription,
+      imageUri // Use the current image URI
+    );
+
+    // Reset fields after saving
+    setTaskTitle('');
+    setTaskDate(null);
+    setTaskDescription('');
+    setIsPrioritized(false);
+    setImageUri(null);
+    router.push('/home-screen');
   };
 
   const onChangeDate = (event: any, selectedDate: Date | undefined) => {
     const currentDate = selectedDate || taskDate;
-    setShowDatePicker(Platform.OS === 'ios'); // On iOS, keep the picker open
-    setTaskDate(currentDate);
+    setShowDatePicker(Platform.OS === 'ios');
+    if (currentDate) {
+      setTaskDate(currentDate);
+    }
+  };
+
+  // Function to handle image picking
+  const pickImage = async () => {
+    // Request permission to access camera roll
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    // Open image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri); // Set the selected image URI
+    }
+  };
+
+  // Function to handle taking a photo
+  const takePhoto = async () => {
+    // Request permission to access the camera
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access the camera is required!');
+      return;
+    }
+
+    // Open camera to take a photo
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri); // Set the captured image URI
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
-        {/* Title */}
         <Text style={styles.title}>Add</Text>
 
-        {/* Task Title Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Title</Text>
           <TextInput
@@ -42,7 +111,6 @@ export default function AddScreen() {
           />
         </View>
 
-        {/* Calendar Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Calendar</Text>
           <TouchableOpacity
@@ -50,13 +118,13 @@ export default function AddScreen() {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={{ flex: 1 }}>
-              {taskDate.toDateString()} {/* Display the selected date */}
+              {taskDate ? taskDate.toDateString() : 'Select a date'}
             </Text>
             <FontAwesome name="calendar" size={24} color="black" />
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={taskDate}
+              value={taskDate || new Date()}
               mode="date"
               display="default"
               onChange={onChangeDate}
@@ -64,7 +132,6 @@ export default function AddScreen() {
           )}
         </View>
 
-        {/* Task Description Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Description</Text>
           <TextInput
@@ -76,7 +143,6 @@ export default function AddScreen() {
           />
         </View>
 
-        {/* Prioritize Toggle */}
         <View style={styles.priorityContainer}>
           <Text style={styles.label}>Prioritize?</Text>
           <TouchableOpacity onPress={() => setIsPrioritized(!isPrioritized)}>
@@ -84,7 +150,19 @@ export default function AddScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Action Buttons */}
+        {/* Image Picker Section */}
+        <View style={styles.imagePickerContainer}>
+          {imageUri && <Image source={{ uri: imageUri }} style={styles.imagePreview} />}
+          <View style={styles.imageButtonsContainer}>
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+              <Text style={styles.imageButtonText}>Pick an Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
+              <Text style={styles.imageButtonText}>Take a Photo</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.cancelButton} onPress={() => router.push('/home-screen')}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -123,7 +201,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8, // Added margin to space label from the input
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -135,10 +213,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   textArea: {
-    height: 120, // Increased height for better appearance
+    height: 120,
     textAlignVertical: 'top',
-    paddingTop: 12, // Added padding to avoid text touching the top edge
-    paddingBottom: 12, // Added padding to avoid text touching the bottom edge
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   calendarInput: {
     flexDirection: 'row',
@@ -156,6 +234,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 30,
+  },
+  imagePickerContainer: {
+    marginBottom: 20,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  imageButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  imageButton: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    backgroundColor: '#CDCABE',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageButtonText: {
+    color: '#000',
+    fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',
